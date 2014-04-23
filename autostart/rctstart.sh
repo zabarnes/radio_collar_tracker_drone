@@ -51,7 +51,7 @@ do
 		# State 2 - go for start, initialize
 			cpufreq-set -g performance >> $log 2>&1
 			cpufreq-info >> $log 2>&1
-			/home/debian/xcode/collarTracker >> /home/debian/out.tmp &
+			stdbuf -o0 /home/debian/xcode/collarTracker >> /home/debian/out.tmp &
 			sudo /home/debian/parser.sh >> $log &
 			echo "$(timestamp): Started program!" >> $log
 			echo "$(timestamp): Started program!"
