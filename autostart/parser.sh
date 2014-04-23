@@ -11,7 +11,7 @@ run=true
 threshold="5"
 log="/home/debian/rctparser.log"
 while $run; do
-	sleep 3
+	sleep 5
 	modify=$(date -r out.tmp +%s)
 	current=$(date +%s)
 	diff=$(($current - $modify))
