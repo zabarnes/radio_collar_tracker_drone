@@ -108,10 +108,10 @@ int main(int argc, char *argv[]) {
 
 	init_memmory();
 
-	fd = init_serial();
+	//fd = init_serial();
 
 	// GPS communication testing
-	serial_read(fd);
+	// serial_read(fd);
 
 	printf("GPS and SDR operating!\n");
 	fflush(stdout);
@@ -146,7 +146,7 @@ int timeout_cb(gpointer darea) {
 			exit(0);
 	*/
 	// GPS Handling
-	serial_read(fd);
+	//serial_read(fd);
 
 	gps_serial_count++;
 	// Gets samples from rtlsdr
@@ -375,9 +375,13 @@ void setup_rtlsdr() {
 }
 
 void populate_gps() {
-	alt	= return_alti();
-	lon	= return_long();
-	lat	= return_lati();
+	//alt	= return_alti();
+	//lon	= return_long();
+	//lat	= return_lati();
+	
+	alt = 10;
+	lon = 10;
+	lat = 10;
 }
 
 void siginthandler(int sig) {
