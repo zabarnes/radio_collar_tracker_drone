@@ -6,7 +6,7 @@ testTracker: collarTracker.o benchgps.o rtlsdr.o
 	gcc collarTracker.o benchgps.o rtlsdr.o $(LD_FLAGS) -o testTracker
 
 collarTracker: collarTracker.o mavgps.o rtlsdr.o serialGPS.o
-	gcc rtlsdr.o collarTracker.o mavgps.o serialGPS.o
+	gcc collarTracker.o mavgps.o serialGPS.o rtlsdr.o $(LD_FLAGS) -o collarTracker
 
 
 serialGPS.o: serialGPS.c
