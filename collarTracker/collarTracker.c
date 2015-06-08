@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "rtlsdr.h"	// rtlsdr module
 #include "gps.h"	// gps module interface.  GPS option select object file
+#include <stdint.h>
 
 ///////////////
 // Filepaths //
@@ -21,6 +22,7 @@ void load_config();
 void sigint_handler(int);
 void setup();
 void set_run_number();
+void compile_data(uint8_t*, gps_struct_t*, uint8_t*);
 
 ///////////////////////////
 // Constant Declarations //
@@ -31,6 +33,10 @@ void set_run_number();
 ///////////////////////////
 // Variable declarations //
 ///////////////////////////
+/**
+ * Run state.  1 is running, 0 is flag to stop
+ */
+int run_state = 1;
 /**
  * Center frequency for collars in Hz
  */
@@ -57,20 +63,14 @@ int controller_coef = 16;
 int frames_per_file = 4;
 
 /**
- *
+ * Length of the sdr data buffer
  */
-unsigned int time_buffer_len = 0;
+int time_buffer_len = 0;
 
 /**
- *
+ * Length of the file buffer
  */
-unsigned int raw_file_buffer_len = 0;
-
-/**
- * Number of times we need to ping the gps per record frame to keep the gps
- * alive
- */
-unsigned int gps_serial_mult = 0;
+int raw_file_buffer_len = 0;
 
 /**
  * RTL SDR device descriptor
@@ -99,17 +99,22 @@ int cur_gain_idx = 0;
  */
 int currentRun = 0;
 
+/**
+ * Current frame.
+ */
+int frame_counter = 0;
+
 //////////////////////////
 // Signal Buffer Arrays //
 //////////////////////////
 /**
  * Time domain buffer
  */
-unsigned char *time_buffer = NULL;
+uint8_t *time_buffer = NULL;
 /**
  * Data storage Time domain buffer
  */
-unsigned char *raw_file_buffer = NULL;
+uint8_t *raw_file_buffer = NULL;
 
 
 /////////////////////////
@@ -128,7 +133,7 @@ int main(int argc, char const *argv[]) {
 
 	set_run_number();
 
-	while (1) {
+	while (run_state) {
 	}
 	return 0;
 }
@@ -167,8 +172,8 @@ void setup() {
 	load_config();
 
 	// run rtlsdr setup
-	setup_rtlsdr(&sdr, sampling_frequency, center_frequency, gain_val,
-	             cur_gain_idx);
+	setup_rtlsdr(&sdr, sampling_frequency, center_frequency,
+	             gain_val[cur_gain_idx]);
 
 	// run gps setup
 	setup_GPS();
@@ -201,7 +206,42 @@ void setup() {
  * @param signum signal input
  */
 void timerloop(int signum) {
-	printf("Hello World!\n");
+	// Get rtlsdr data
+	if (read_rtlsdr(sdr, time_buffer, time_buffer_len)) {
+		// problem with read!
+		exit(-1);
+	}
+
+	gps_struct_t* gps;
+	gps = get_GPS();
+
+	compile_data(time_buffer, gps, raw_file_buffer);
+
+	printf("Current Frame: %03d Gain: %03d\n", frame_counter,
+	       gain_val[(int)cur_gain_idx]);
+
+}
+
+void compile_data(uint8_t* time_buffer, gps_struct_t* gps_data,
+                  uint8_t* raw_file_buffer) {
+	for (int i = 0; i < time_buffer_len / 2; i++) {
+		raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) + 2 * i] =
+		    time_buffer[2 * i];
+		raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) + 2 * i + 1]
+		    = time_buffer[2 * i + 1];
+	}
+
+	for (int i = 0; i < 4; i++) {
+		raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		                time_buffer_len + 1] = ((int)(gps_data->lat * 10000000) >> 8 * i) & 0xFF;
+		raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		                time_buffer_len + 4 + i] = ((int)(gps_data->lon * 10000000) >> 8 * i) & 0xFF;
+		raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+		                time_buffer_len + 8 + i] = ((int)(gps_data->alt * 1000) >> 8 * i) & 0xFF;
+	}
+
+	raw_file_buffer[frame_counter * (time_buffer_len + EXTRA_DATA_SIZE) +
+	                time_buffer_len + EXTRA_DATA_SIZE - 1] = cur_gain_idx;
 }
 
 /**
@@ -226,5 +266,6 @@ void load_config() {
  */
 void sigint_handler(int signal) {
 	printf("Got SIGINT!!!\n");
-	exit(-1);
+	setitimer(ITIMER_REAL, NULL, NULL);
+	run_state = 0;
 }
