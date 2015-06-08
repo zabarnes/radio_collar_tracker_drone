@@ -1,5 +1,6 @@
 #include "gps.h"
 #include <time.h>
+#include <stdlib.h>
 
 int setup_GPS() {
 	return 0;
@@ -14,5 +15,5 @@ gps_struct_t* get_GPS() {
 	gps->lat = 32.7150;
 	gps->lon = 117.1625;
 	gps->alt = 20;
-	gps->time = timer();
+	gps->time = time(NULL);
 }
