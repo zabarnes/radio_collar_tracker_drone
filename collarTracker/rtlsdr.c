@@ -41,12 +41,12 @@ void setup_rtlsdr(rtlsdr_dev_t** dev, uint32_t sampling_frequency,
 		fprintf(stderr, "WARNING: Failed to enable manual gain!\n");
 	}
 
-	if (rtlsdr_set_tuner_gain(*dev, gain) {
-	fprintf(stderr, "WARMING: Failed to set fixed gain!\n");
+	if (rtlsdr_set_tuner_gain(*dev, gain)) {
+		fprintf(stderr, "WARMING: Failed to set fixed gain!\n");
 	}
 
 	if (rtlsdr_reset_buffer(*dev)) {
-	fprintf(stderr, "WARNING: Failed to reset buffers!\n");
+		fprintf(stderr, "WARNING: Failed to reset buffers!\n");
 	}
 }
 
