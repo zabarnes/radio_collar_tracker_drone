@@ -22,7 +22,8 @@ rtlsdr.o: rtlsdr.c rtlsdr.h
 	gcc rtlsdr.c $(GCC_FLAGS)
 
 clean:
-	-rm $(wildcared *.o)
+	-rm *.o
+	-rm *.out
 	-rm collarTracker
 	-rm testTracker
 
