@@ -12,6 +12,7 @@
 ///////////////
 #define CONFIG_FILE_PATH	"/media/RAW_DATA/rct/cfg"
 #define FILE_COUNTER_PATH	"/media/RAW_DATA/rct/fileCount"
+#define RAW_DATA_PREFIX	"/media/RAW_DATA/rct/RAW_DATA_"
 
 ///////////////////////////
 // Function declarations //
@@ -23,6 +24,7 @@ void sigint_handler(int);
 void setup();
 void set_run_number();
 void compile_data(uint8_t*, gps_struct_t*, uint8_t*);
+int store_data(int length, uint8_t* buffer);
 
 ///////////////////////////
 // Constant Declarations //
@@ -103,6 +105,8 @@ int currentRun = 0;
  * Current frame.
  */
 int frame_counter = 0;
+
+int file_number = 1;
 
 //////////////////////////
 // Signal Buffer Arrays //
@@ -219,7 +223,13 @@ void timerloop(int signum) {
 
 	printf("Current Frame: %03d Gain: %03d\n", frame_counter,
 	       gain_val[(int)cur_gain_idx]);
+	frame_counter++;
+	if (frame_counter >= frames_per_file) {
+		printf("FILE: %06d\n", file_number);
+		if (store_data(raw_file_buffer_len, raw_file_buffer)) {
 
+		}
+	}
 }
 
 void compile_data(uint8_t* time_buffer, gps_struct_t* gps_data,
@@ -268,4 +278,25 @@ void sigint_handler(int signal) {
 	printf("Got SIGINT!!!\n");
 	setitimer(ITIMER_REAL, NULL, NULL);
 	run_state = 0;
+}
+
+/**
+ * Stores length bytes from buffer into the file specified in the global
+ * variables.
+ *
+ * @param  length Number of bytes to store
+ * @param  buffer Buffer of data to store
+ * @return        0 if successful, nonzero otherwise.
+ */
+int store_data(int length, uint8_t* buffer) {
+	char filename[256];
+	sprintf(filename, "%s%06d_%06d", RAW_DATA_PREFIX, currentRun, file_number);
+	FILE* fileStream = fopen(filename, "wb");
+	if (!fileStream) {
+		fprintf(stderr, "ERROR: Failed to write to file %s\n", filename);
+		exit(-1);
+	}
+	fwrite(raw_file_buffer, sizeof(uint8_t), raw_file_buffer_len * sizeof(uint8_t),
+	       fileStream);
+	fclose(fileStream);
 }
