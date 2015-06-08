@@ -11,7 +11,7 @@ void setup_rtlsdr(rtlsdr_dev_t** dev, unsigned int sampling_frequency,
 	}
 
 	int dev_index = 0;	// get 1st device
-	if (rtlsdr_open(dev, dev_index) == dev_index) {
+	if (rtlsdr_open(dev, dev_index)) {
 		fprintf(stderr, "Failed to open rtlsdr device #%d! Exiting...\n", dev_index);
 		exit(1);
 	}
