@@ -15,7 +15,7 @@ serialGPS.o: serialGPS.c
 collarTracker.o: collarTracker.c gps.h rtlsdr.h
 	gcc collarTracker.c $(GCC_FLAGS)
 
-benchgps.o: gps.h benchgps.c gps_struct.h
+benchgps.o: gps.h benchgps.c
 	gcc benchgps.c $(GCC_FLAGS)
 
 rtlsdr.o: rtlsdr.c rtlsdr.h
