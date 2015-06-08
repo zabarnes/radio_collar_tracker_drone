@@ -1,12 +1,12 @@
 #ifndef __MAVGPS__
 #define __MAVGPS__
 
-struct gps_struct_t {
+typedef struct gps_struct {
 	double lat;
 	double lon;
 	double alt;
 	long time;
-};
+} gps_struct_t;
 
 /**
  * Sets up the GPS for use
