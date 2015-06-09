@@ -28,4 +28,9 @@ void update_GPS();
  */
 gps_struct_t* get_GPS();
 
+/**
+ * Disables the GPS and releases the resources.
+ */
+void teardown_gps();
+
 #endif	//__MAVGPS__

@@ -17,3 +17,7 @@ gps_struct_t* get_GPS() {
 	gps->alt = 20;
 	gps->time = time(NULL);
 }
+
+void teardown_gps() {
+	return;
+}
