@@ -12,7 +12,8 @@
 ///////////////
 #define CONFIG_FILE_PATH	"/media/RAW_DATA/rct/cfg"
 #define FILE_COUNTER_PATH	"/media/RAW_DATA/rct/fileCount"
-#define RAW_DATA_PREFIX	"/media/RAW_DATA/rct/RAW_DATA_"
+#define RAW_DATA_PREFIX		"/media/RAW_DATA/rct/RAW_DATA_"
+#define META_FILE_PREFIX	"/media/RAW_DATA/rct/RUN_META_"
 
 ///////////////////////////
 // Function declarations //
@@ -25,6 +26,8 @@ void setup();
 void set_run_number();
 void compile_data(uint8_t*, gps_struct_t*, uint8_t*);
 int store_data(int length, uint8_t* buffer);
+int update_meta();
+void adjust_gain();
 
 ///////////////////////////
 // Constant Declarations //
@@ -106,6 +109,9 @@ int currentRun = 0;
  */
 int frame_counter = 0;
 
+/**
+ * Current data file number
+ */
 int file_number = 1;
 
 //////////////////////////
@@ -142,6 +148,9 @@ int main(int argc, char const *argv[]) {
 	return 0;
 }
 
+/**
+ * Sets the current run's run nuber and increments the run number on disk.
+ */
 void set_run_number() {
 	FILE *fileStream = fopen(FILE_COUNTER_PATH, "r+");
 	char fileBuffer[256];
@@ -227,11 +236,26 @@ void timerloop(int signum) {
 	if (frame_counter >= frames_per_file) {
 		printf("FILE: %06d\n", file_number);
 		if (store_data(raw_file_buffer_len, raw_file_buffer)) {
-
+			fprintf(stderr, "ERROR: Failed to write to raw file!\n");
+			exit(-1);
 		}
+		frame_counter = 0;
+		if (update_meta()) {
+			fprintf(stderr, "ERROR: Failed to write to meta file!\n");
+			exit(-1);
+		}
+		file_number++;
 	}
+	adjust_gain();
 }
 
+/**
+ * Compiles the given buffers of data into the raw file buffer.
+ *
+ * @param time_buffer     SDR data buffer
+ * @param gps_data        GPS data struct
+ * @param raw_file_buffer Raw data buffer to fill
+ */
 void compile_data(uint8_t* time_buffer, gps_struct_t* gps_data,
                   uint8_t* raw_file_buffer) {
 	for (int i = 0; i < time_buffer_len / 2; i++) {
@@ -293,10 +317,65 @@ int store_data(int length, uint8_t* buffer) {
 	sprintf(filename, "%s%06d_%06d", RAW_DATA_PREFIX, currentRun, file_number);
 	FILE* fileStream = fopen(filename, "wb");
 	if (!fileStream) {
-		fprintf(stderr, "ERROR: Failed to write to file %s\n", filename);
-		exit(-1);
+		return -1;
 	}
 	fwrite(raw_file_buffer, sizeof(uint8_t), raw_file_buffer_len * sizeof(uint8_t),
 	       fileStream);
 	fclose(fileStream);
+	return 0;
+}
+
+/**
+ * Updates the meta file on disk with data from this run.
+ *
+ * @return 0 if successful, nonzero otherwise.
+ */
+int update_meta() {
+	char filename[256];
+	sprintf(filename, "%s%06d", META_FILE_PREFIX, currentRun);
+	FILE* fileStream = fopen(filename, "wb");
+	if (!fileStream) {
+		return -1;
+	}
+	fprintf(fileStream,
+	        "center_freq: %d \n"
+	        "samp_rate: %d \n"
+	        "timeout_interrupt: %d \n"
+	        "goal_signal_amplitude: %d \n"
+	        "controller_coef: %d \n"
+	        "number_frames_per_file: %d \n"
+	        "currentRunFile: %d \n ",
+	        center_frequency,
+	        sampling_frequency,
+	        record_period,
+	        SNR_amplitude_goal,
+	        controller_coef,
+	        frames_per_file,
+	        file_number);
+	fclose(fileStream);
+}
+
+/**
+ * Automatically adjusts the gain of the SDR.
+ */
+void adjust_gain() {
+	int max = 0;
+	for (int i = 0; i < time_buffer_len; i += 2) {
+		if (time_buffer[i] > max) {
+			max = time_buffer[i];
+		}
+	}
+	max -= 128;
+
+	cur_gain_idx += (SNR_amplitude_goal - abs(max)) / controller_coef;
+
+	if (cur_gain_idx > max_gain_idx) {
+		cur_gain_idx = max_gain_idx;
+	} else if (cur_gain_idx < 0) {
+		cur_gain_idx = 0;
+	}
+
+	if (set_gain_rtlsdr(sdr, gain_val[cur_gain_idx])) {
+		fprintf(stderr, "WARNING: Failed to set gain!\n");
+	}
 }
