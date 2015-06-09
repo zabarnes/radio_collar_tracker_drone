@@ -34,4 +34,13 @@ int test_rtlsdr(rtlsdr_dev_t* dev);
  */
 int read_rtlsdr(rtlsdr_dev_t* dev, uint8_t* time_buffer,
                 int time_buffer_len);
+
+/**
+ * Attempts to set the tuner gain of the RTL SDR.
+ *
+ * @param  dev  RTL SDR device
+ * @param  gain gain level
+ * @return      0 if successful, -1 otherwise.
+ */
+int set_gain_rtlsdr(rtlsdr_dev_t* dev, int gain);
 #endif //__RTLSDR_MOD__

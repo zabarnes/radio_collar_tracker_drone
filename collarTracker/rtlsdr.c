@@ -94,3 +94,17 @@ int test_rtlsdr(rtlsdr_dev_t* dev) {
 	}
 	return 0;
 }
+
+/**
+ * Attempts to set the tuner gain of the RTL SDR.
+ *
+ * @param  dev  RTL SDR device
+ * @param  gain gain level
+ * @return      0 if successful, -1 otherwise.
+ */
+int set_gain_rtlsdr(rtlsdr_dev_t* dev, int gain) {
+	if (rtlsdr_set_tuner_gain(dev, gain)) {
+		return -1;
+	}
+	return 0;
+}
