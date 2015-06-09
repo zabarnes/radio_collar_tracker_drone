@@ -353,6 +353,7 @@ int update_meta() {
 	        frames_per_file,
 	        file_number);
 	fclose(fileStream);
+	return 0;
 }
 
 /**
