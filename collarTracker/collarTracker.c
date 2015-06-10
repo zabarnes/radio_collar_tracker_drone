@@ -28,6 +28,7 @@ void compile_data(uint8_t*, gps_struct_t*, uint8_t*);
 int store_data(int length, uint8_t* buffer);
 int update_meta();
 void adjust_gain();
+void teardown();
 
 ///////////////////////////
 // Constant Declarations //
@@ -145,6 +146,8 @@ int main(int argc, char const *argv[]) {
 
 	while (run_state) {
 	}
+
+	teardown();
 	return 0;
 }
 
@@ -379,4 +382,15 @@ void adjust_gain() {
 	if (set_gain_rtlsdr(sdr, gain_val[cur_gain_idx])) {
 		fprintf(stderr, "WARNING: Failed to set gain!\n");
 	}
+}
+
+/**
+ * Cleanup function
+ */
+void teardown() {
+	// close GPS
+	teardown_gps();
+
+	free(time_buffer);
+	free(raw_file_buffer);
 }
