@@ -295,62 +295,62 @@ void load_config() {
 	}
 	// 6 lines in the config file
 	char* buffer = calloc(sizeof(char), 256);
-	if (fscanf(cfg_file, "%s: %d", buffer, &center_frequency) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &center_frequency) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "center_freq")) {
+	if (strcmp(buffer, "center_freq:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (fscanf(cfg_file, "%s: %d", buffer, &sampling_frequency) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &sampling_frequency) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "samp_rate")) {
+	if (strcmp(buffer, "samp_rate:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (fscanf(cfg_file, "%s: %d", buffer, &record_period) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &record_period) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "timeout_interrupt")) {
+	if (strcmp(buffer, "timeout_interrupt:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (fscanf(cfg_file, "%s: %d", buffer, &SNR_amplitude_goal) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &SNR_amplitude_goal) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "goal_signal_amplitude")) {
+	if (strcmp(buffer, "goal_signal_amplitude:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (fscanf(cfg_file, "%s: %d", buffer, &controller_coef) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &controller_coef) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "controller_coef")) {
+	if (strcmp(buffer, "controller_coef:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (fscanf(cfg_file, "%s: %d", buffer, &frames_per_file) != 2) {
+	if (fscanf(cfg_file, "%s %d", buffer, &frames_per_file) != 2) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
 	}
-	if (strcmp(buffer, "number_frames_per_file")) {
+	if (strcmp(buffer, "number_frames_per_file:")) {
 		fprintf(stderr, "ERROR: Failed to properly read the configuration file!"
 		        " Exiting...\n");
 		exit(1);
