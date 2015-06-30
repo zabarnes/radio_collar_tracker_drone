@@ -5,13 +5,13 @@ if [ ! -e /sys/class/gpio/gpio60 ]
 fi
 run=true
 while $run; do
-	sleep 0.5
+	sleep 2
 	read line
 	retval=$?
 	if [ "$retval" = "1" ]
         then	# EOF reached.  Normal end
         # echo "Found EOF, waiting..."
-        sleep 2
+        sleep 3
         read line
         retval=$?
         if [ "$retval" = "1" ]

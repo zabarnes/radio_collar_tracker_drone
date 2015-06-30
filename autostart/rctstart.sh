@@ -32,7 +32,7 @@ do
 			cpufreq-set -g performance >> $log 2>&1
 			cpufreq-info >> $log 2>&1
 			/home/debian/xcode/collarTracker > /home/debian/out.tmp &
-			# /home/debian/ct > /home/debian/out.tmp &
+			#/home/debian/ct > /home/debian/out.tmp &
 			/home/debian/parser.sh < /home/debian/out.tmp >> $log 2>&1 &
 			echo "$(timestamp): Started program!" >> $log
 			stateVal="endWait"
@@ -48,7 +48,7 @@ do
 			;;
 		"endgo" )
 			killall collarTracker -s INT
-			# killall ct -s INT
+			#killall ct -s INT
 			echo "$(timestamp): Ended program!" >> $log
 			stateVal="startWait"
 			;;
