@@ -1,4 +1,14 @@
 #!/bin/sh
+### BEGIN INIT INFO
+# Provides:          rct start
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: rctstart
+# Description:       radio collar start
+### END INIT INFO
+
 # setup here
 timestamp(){
 	date
