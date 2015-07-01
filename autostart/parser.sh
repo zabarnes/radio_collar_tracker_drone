@@ -1,4 +1,8 @@
 #!/bin/bash
+timestamp(){
+	date
+}
+
 if [ ! -e /sys/class/gpio/gpio60 ]
 	then
 	echo 60 > /sys/class/gpio/export
