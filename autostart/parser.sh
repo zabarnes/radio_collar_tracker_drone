@@ -14,10 +14,9 @@ while $run; do
 	sleep 3
 	modify=$(date -r out.tmp +%s)
 	current=$(date +%s)
-	diff=`expr $current - $modify`
-	echo $diff
+	diff=$(($current - $modify))
 
-	if [ "$diff" -gt "$threshold" ]
+	if [[ $diff -gt $threshold ]]
 		then
 		echo low > /sys/class/gpio/gpio60/direction
 		run=false;
