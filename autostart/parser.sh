@@ -15,6 +15,7 @@ while $run; do
 	modify=$(date -r out.tmp +%s)
 	current=$(date +%s)
 	diff=`expr $current - $modify`
+	echo $diff
 
 	if [ "$diff" -gt "$threshold" ]
 		then
