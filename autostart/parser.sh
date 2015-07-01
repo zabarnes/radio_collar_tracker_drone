@@ -19,7 +19,7 @@ while $run; do
 	        echo "Error! TIMEOUT! REBOOT!"
 			echo low > /sys/class/gpio/gpio60/direction
 			run=false;
-			killall collarTracker -s INT
+			kill -9 `pgrep collarTracker`
 			# reboot
 		fi
 	fi

@@ -21,7 +21,15 @@ if [ ! -e /home/debian/autostart ]
 	exit
 fi
 
-echo 30 > /sys/class/gpio/export
+if [ ! -e /sys/class/gpio/gpio30 ]
+    then
+    echo 30 > /sys/class/gpio/export
+fi
+if [ ! -e /sys/class/gpio/gpio60 ]
+    then
+    echo 60 > /sys/class/gpio/export
+fi
+echo low > /sys/class/gpio/gpio60/direction
 stateVal="startWait"
 echo "$(timestamp): Starting..." >> $log
 while true
@@ -57,7 +65,7 @@ do
 			stateVal="endgo"
 			;;
 		"endgo" )
-			killall collarTracker -s INT
+			kill -9 `pgrep collarTracker`
 			#killall ct -s INT
 			echo "$(timestamp): Ended program!" >> $log
 			stateVal="startWait"
