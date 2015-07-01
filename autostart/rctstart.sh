@@ -16,11 +16,6 @@ timestamp(){
 
 log="/home/debian/rct.log"
 # check for autostart file!
-if [ ! -e /home/debian/autostart ]
-	then
-	exit
-fi
-
 if [ ! -e /sys/class/gpio/gpio30 ]
     then
     echo 30 > /sys/class/gpio/export
@@ -30,6 +25,11 @@ if [ ! -e /sys/class/gpio/gpio60 ]
     echo 60 > /sys/class/gpio/export
 fi
 echo low > /sys/class/gpio/gpio60/direction
+if [ ! -e /home/debian/autostart ]
+	then
+	exit
+fi
+
 stateVal="startWait"
 echo "$(timestamp): Starting..." >> $log
 while true
