@@ -9,7 +9,7 @@ if [ ! -e /sys/class/gpio/gpio60 ]
 fi
 run=true
 threshold="5"
-log="/home/debian/rct.log"
+log="/home/debian/rctparser.log"
 while $run; do
 	sleep 3
 	modify=$(date -r out.tmp +%s)
