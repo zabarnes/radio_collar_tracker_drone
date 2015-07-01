@@ -1,47 +1,23 @@
 #!/bin/bash
 if [ ! -e /sys/class/gpio/gpio60 ]
-    then
-    echo 60 > /sys/class/gpio/export
+	then
+	echo 60 > /sys/class/gpio/export
 fi
 run=true
+threshold="5"
 while $run; do
-	sleep 2
-	read line
-	retval=$?
-	if [ "$retval" = "1" ]
-        then	# EOF reached.  Normal end
-        # echo "Found EOF, waiting..."
-        sleep 3
-        read line
-        retval=$?
-        if [ "$retval" = "1" ]
-        	then	# EOF reached, no change for 2 seconds!
-	        echo "Error! TIMEOUT! REBOOT!"
-			echo low > /sys/class/gpio/gpio60/direction
-			run=false;
-			kill -9 `pgrep collarTracker`
-			# reboot
-		fi
-	fi
-	if [ "$retval" = "0" ]
-		echo $line
-        then
-		if [ "$(echo $line | grep Frame | wc -l)" != "0" ]
-            then
-            # echo "Got Frame!"
-			echo high > /sys/class/gpio/gpio60/direction
-		fi
-		if [ "$(echo $line | grep SIGINT | wc -l)" = "1" ]
-            then
-            # echo "Got SIGINT!, exiting..."
-			echo low > /sys/class/gpio/gpio60/direction
-			run=false;
-		fi
-		if [ "$(echo $line | grep GPS | wc -l)" = "1" ]
-            then
-            # echo "Got GPS!"
-			echo high > /sys/class/gpio/gpio60/direction
-		fi
+	sleep 3
+	modify=$(date -r out.tmp +%s)
+	current=$(date +%s)
+	diff=`expr $current - $modify`
+
+	if [ "$diff" -gt "$threshold" ]
+		then
+		echo low > /sys/class/gpio/gpio60/direction
+		run=false;
+		sudo kill -9 `pgrep collarTracker`
+	else
+		echo high > /sys/class/gpio/gpio60/direction
 	fi
 done
 echo low > /sys/class/gpio/gpio60/direction
