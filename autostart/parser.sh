@@ -8,7 +8,7 @@ if [ ! -e /sys/class/gpio/gpio60 ]
 	echo 60 > /sys/class/gpio/export
 fi
 run=true
-threshold="5"
+threshold="35"
 log="/home/debian/rctparser.log"
 while $run; do
 	sleep 5
