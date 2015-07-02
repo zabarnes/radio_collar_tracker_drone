@@ -12,9 +12,7 @@ run=true
 threshold="35"
 log="/home/debian/rctparser.log"
 while $run; do
-	numFiles=$(ls -l /media/RAW_DATA/rct/ | wc -l)
-	sleep 30
-	if [[ $(ls -l /media/RAW_DATA/rct/ | wc -l) -ne numFiles ]]
+	if [[ -z $(pgrep collarTracker) ]]
 		then
 		echo "0" > /sys/class/gpio/gpio60/direction
 		run=false;
@@ -26,5 +24,6 @@ while $run; do
 		echo "$(timestamp): collarTracker is still alive"
 		echo "$(timestamp): collarTracker is still alive" >> $log
 	fi
+	sleep 1
 done
 echo "0" > /sys/class/gpio/gpio60/direction
