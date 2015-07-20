@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include "serialGPS.h"
+#include <time.h>
 
 #define FILE_BUFFER_SIZE			256
 #define AUX_STRING_SIZE				256
@@ -24,12 +25,16 @@ unsigned char *rawFileBuffer 		= NULL;	// Data Storage Time domain buffer
 
 // File Handling Variables
 FILE *fileStream;
+FILE *logStream;
 fpos_t filePos;
 char fileBuffer[FILE_BUFFER_SIZE];
 char meta_file_path[FILE_BUFFER_SIZE];
 int currentRun						= 0;
 int currentRunFile					= 1;
 int trigger 						= 0;
+
+// Timing variables
+struct timespec spec;
 
 // Config Variables
 const int valid_gain_values[] 		= { 0, 9, 14, 27, 37, 77, 87, 125, 144, 157, 166, 197, 207, 229, 254, 280, 297, 328, 338, 364, 372, 386, 402, 421, 434, 439, 445, 480, 496 };
@@ -137,6 +142,9 @@ void destroy(GtkWidget *widget, gpointer data) {
 }
 
 int timeout_cb(gpointer darea) {
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Started timeout\n",
+	        spec.tv_sec + spec.tv_nsec / 1.0e9);
 
 	/*	fileStream = fopen(PIN_PATH,"r");
 		fgets(fileBuffer, FILE_BUFFER_SIZE,fileStream);
@@ -147,14 +155,24 @@ int timeout_cb(gpointer darea) {
 	*/
 	// GPS Handling
 	serial_read(fd);
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Got GPS\n", spec.tv_sec + spec.tv_nsec / 1.0e9);
+
 
 	gps_serial_count++;
 	// Gets samples from rtlsdr
 	if (gps_serial_count >= gps_serial_mult) {
 		gps_serial_count = 0;
+		clock_gettime(CLOCK_REALTIME, &spec);
+		fprintf(logStream, "%.3f: Getting SDR data...\n",
+		        spec.tv_sec + spec.tv_nsec / 1.0e9);
+
 		if (read_rtlsdr()) {
 			return FALSE;    // error handling
 		}
+		clock_gettime(CLOCK_REALTIME, &spec);
+		fprintf(logStream, "%.3f: done\n", spec.tv_sec + spec.tv_nsec / 1.0e9);
+
 
 		populate_gps();
 
@@ -176,6 +194,10 @@ int timeout_cb(gpointer darea) {
 
 		adjust_gain();
 	}
+
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Finished timeout\n",
+	        spec.tv_sec + spec.tv_nsec / 1.0e9);
 
 	return TRUE;
 }
@@ -217,6 +239,10 @@ void store_data() {
 void init_memmory() {
 	time_buffer		= malloc(time_buffer_len * sizeof(unsigned char));
 	rawFileBuffer	= malloc(raw_file_buffer_len * sizeof(unsigned char));
+	logStream = fopen("collarTracker.log", "a");
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Started collarTracker log\n",
+	        spec.tv_sec + spec.tv_nsec / 1.0e9);
 }
 
 void update_meta() {
