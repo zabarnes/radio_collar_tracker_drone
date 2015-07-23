@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <cairo.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
