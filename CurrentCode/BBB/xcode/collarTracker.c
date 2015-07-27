@@ -232,8 +232,12 @@ void store_data() {
 	sprintf(auxString, "%s%06d_%06d", RAW_DATA_FILENAME, currentRun,
 	        currentRunFile);
 	fileStream = fopen(auxString, "wb");
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Started write\n");
 	fwrite(rawFileBuffer, sizeof(unsigned char),
 	       raw_file_buffer_len * sizeof(unsigned char), fileStream);
+	clock_gettime(CLOCK_REALTIME, &spec);
+	fprintf(logStream, "%.3f: Finished write\n");
 	fclose(fileStream);
 }
 
