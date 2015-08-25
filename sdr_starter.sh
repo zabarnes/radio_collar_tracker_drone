@@ -5,7 +5,7 @@ freq=172464000
 gain="19.7"
 output="/media/RAW_DATA/rct/"
 sampling_freq=2048000
-port="/dev/ttyACM0"
+port="/dev/ttyO2"
 
 while getopts "r:f:g:o:s:p:" opt; do
 	case $opt in
