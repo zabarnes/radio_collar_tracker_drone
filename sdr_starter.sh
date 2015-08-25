@@ -44,7 +44,7 @@ if [[ "$run" -ne $run ]]; then
 fi
 
 if [[ $run -eq -1 ]]; then
-	run=`/home/pi/radio_collar_tracker/getRunNum.py $output`
+	run=`/home/debian/radio_collar_tracker/getRunNum.py $output`
 fi
 
 if [[ "$freq" -ne $freq ]]; then
@@ -62,10 +62,10 @@ echo "GPS_" >> gps_logger_args
 echo "" >> gps_logger_args
 echo $run >> gps_logger_args
 echo $port >> gps_logger_args
-/home/pi/radio_collar_tracker/gps_logger/gps_logger.py &
+/home/debian/radio_collar_tracker/gps_logger/gps_logger.py &
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
+/home/debian/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
