@@ -10,6 +10,7 @@ if [ ! -e $led_dir ]
     echo $led_num > /sys/class/gpio/export
 fi
 run=true
+trap "echo low > $led_dir/direction; exit 0" SIGINT SIGTERM
 while $run; do
 	echo high > $led_dir/direction
 	sleep 0.5
@@ -23,3 +24,5 @@ while $run; do
 	fi
 done
 echo low > $led_dir/direction
+kill -s SIGINT $mavproxypid
+kill -s SIGINT $sdr_starterpid
