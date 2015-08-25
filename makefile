@@ -8,19 +8,19 @@ PI_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py au
 	update-rc.d rctstart defaults
 
 PI_uninstall:
-	update-rc.d rctstart remove
-	rm /etc/init.d/rctstart
+	-update-rc.d rctstart remove
+	-rm /etc/init.d/rctstart
 
 BBB_install: sdr_record/sdr_record autostart/rctstart gps_logger/gps_logger.py autostart/parser.sh getRunNum.py
+	cp autostart/mount_RAW_DATA /etc/init.d/
+	update-rc.d mount_RAW_DATA defaults
 	cp autostart/rctstart /etc/init.d/
 	update-rc.d rctstart defaults
 	-mkdir /media/RAW_DATA/
-	cp autostart/mount_RAW_DATA /etc/init.d/
-	update-rc.d mount_RAW_DATA defaults
 	
 BBB_uninstall:
-	update_rc.d rctstart remove
-	update_rc.d mount_RAW_DATA remove
-	rm /etc/init.d/rctstart
-	rm /etc/init.d/mount_RAW_DATA
-	rm /media/RAW_DATA
+	-update-rc.d rctstart remove
+	-update-rc.d mount_RAW_DATA remove
+	-rm /etc/init.d/rctstart
+	-rm /etc/init.d/mount_RAW_DATA
+	-rmdir /media/RAW_DATA
