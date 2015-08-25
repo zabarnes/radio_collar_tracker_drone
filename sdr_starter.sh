@@ -6,7 +6,7 @@ gain="19.7"
 output="/media/RAW_DATA/rct/"
 sampling_freq=2048000
 port="/dev/ttyO2"
-led_num=17
+led_num=60
 
 
 led_dir="/sys/class/gpio/gpio$led_num"

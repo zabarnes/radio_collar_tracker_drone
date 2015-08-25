@@ -8,7 +8,7 @@
 # Short-Description: Start radio collar tracker payload on switch
 ### END INIT INFO
 # setup here
-switch_num="4"
+switch_num=30
 
 switch_dir="/sys/class/gpio/gpio$switch_num"
 timestamp(){
