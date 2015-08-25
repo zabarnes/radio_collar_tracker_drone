@@ -15,9 +15,9 @@ timestamp(){
 	date
 }
 
-log="/home/pi/rct.log"
+log="/home/debian/rct.log"
 # check for autostart file!
-if [ ! -e "/home/pi/autostart" ]
+if [ ! -e "/home/debian/autostart" ]
 	then
 		echo "Autostart not found!"
 	exit
@@ -41,7 +41,7 @@ do
 			;;
 		"startgo" )
 		# State 2 - go for start, initialize
-			/home/pi/radio_collar_tracker/sdr_starter.sh &
+			/home/debian/radio_collar_tracker/sdr_starter.sh &
 			sdr_starter_pid=$!
 			echo "$(timestamp): Started program!" >> $log
 			stateVal="endWait"
