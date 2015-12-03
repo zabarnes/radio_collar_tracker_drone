@@ -29,10 +29,10 @@ queue.o: queue.c
 
 test: sdr_record
 	-mkdir test
-	./sdr_record -r 1 -o test &
+	./sdr_record -r 1 -o test -d 0 &
+	./sdr_record -r 1 -o test -d 1 &
 	sleep 5
-	sudo killall sdr_record
-	sleep .5
+	sudo killall sdr_record -SIGINT
 
 raw_data_to_complex: raw_data_to_complex.c
 	gcc raw_data_to_complex.c $(CFLAGS)
