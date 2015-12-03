@@ -62,10 +62,13 @@ fi
 /home/pi/radio_collar_tracker/gps_logger/gps_logger.py -o $output -r $run -i $port &>> ${gps_log} &
 mavproxypid=$!
 
-/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
-sdr_record_pid=$!
+/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output -d 0 &>> ${sdr_log} &
+sdr_record1_pid=$!
 
-trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
+/home/pi/radio_collar_tracker/sdr_record/sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output -d 1 &>> ${sdr_log} &
+sdr_record2_pid=$!
+
+trap "echo 'got sigint'; /bin/kill -s SIGINT $mavproxypid; /bin/kill -s SIGINT $sdr_record1_pid; /bin/kill -s SIGINT $sdr_record2_pid; echo low > $led_dir/direction; sleep 1; rm gps_logger_args; exit 0" SIGINT SIGTERM
 run=true
 while $run
 do
