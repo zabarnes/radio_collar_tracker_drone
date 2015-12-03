@@ -196,6 +196,7 @@ int main(int argc, char** argv) {
 	fclose(timing_stream);
 
 	printf("Stopping record\n");
+	run = 0;
 	printf("Queued %f seconds of data\n", num_samples / 2048000.0);
 	pthread_join(thread_id, NULL);
 	rtlsdr_close(dev);
