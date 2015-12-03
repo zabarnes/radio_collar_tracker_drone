@@ -25,6 +25,7 @@
 struct proc_queue_args {
 	int run_num;
 	int frame_len;
+	int dev_id;
 };
 
 // Global variables
@@ -79,6 +80,7 @@ int main(int argc, char** argv) {
 	struct proc_queue_args pargs;
 	// Device ID
 	int dev_id = 0;
+	int multiple_device = 0;
 
 	// Get command line options
 	// printf("Getting command line options\n");
@@ -104,6 +106,7 @@ int main(int argc, char** argv) {
 				break;
 			case 'd':
 				dev_id = (atoi(optarg));
+				multiple_device = 1;
 				break;
 		}
 	}
@@ -168,6 +171,7 @@ int main(int argc, char** argv) {
 	}
 	pargs.run_num = run_num;
 	pargs.frame_len = block_size;
+	pargs.dev_id = dev_id;
 	if (pthread_create(&thread_id, &attr, proc_queue, (void*) &pargs)) {
 		fprintf(stderr, "ERROR: Failed to create detached thread.\n");
 		exit(1);
@@ -215,6 +219,7 @@ void* proc_queue(void* args) {
 	struct proc_queue_args* pargs = (struct proc_queue_args*) args;
 	int run_num = pargs->run_num;
 	int frame_len = pargs->frame_len;
+	int dev_id = pargs->dev_id;
 	FILE* data_stream;
 	char buff[256];
 	int frame_num;
@@ -244,8 +249,8 @@ void* proc_queue(void* args) {
 					fclose(data_stream);
 				}
 				snprintf(buff, sizeof(buff),
-				         "%s/RAW_DATA_%06d_%06d", DATA_DIR, run_num,
-				         frame_num / FRAMES_PER_FILE + 1);
+				         "%s/RAW_DATA_%06d_%06d_%02d", DATA_DIR, run_num,
+				         frame_num / FRAMES_PER_FILE + 1, dev_id);
 				// printf("File: %s\n", buff);
 				file_num++;
 				data_stream = fopen(buff, "wb");
