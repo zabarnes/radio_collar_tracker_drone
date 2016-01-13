@@ -4,7 +4,7 @@
 #
 # Defaults to   destination:    /media/RAW_DATA/rct/
 #               prefix:         GPS_
-#               suffix:         
+#               suffix:
 #               runNum:         1
 from pymavlink import mavutil
 import time
@@ -14,8 +14,8 @@ import sys
 from time import sleep
 
 def handler(signum, frame):
-    global runstate
-    runstate = False
+	global runstate
+	runstate = False
 
 
 signal.signal(signal.SIGINT, handler)
@@ -44,29 +44,32 @@ logfile = open("%s/%s%06d" % (dataDir, gpsPrefix, runNum), "w")
 mavmaster = mavutil.mavlink_connection(port, 57600)
 fail_counter = 0
 while True:
-    if mavmaster.wait_heartbeat(blocking=False) is not None:
-        break
-    fail_counter += 1
-    if fail_counter > 1000:
-        print("GPS_LOGGER: ERROR: Timeout connecting!")
-        sys.exit(1)
-    sleep(0.005)
+	if mavmaster.wait_heartbeat(blocking=False) is not None:
+		break
+	fail_counter += 1
+	if fail_counter > 1000:
+		print("GPS_LOGGER: ERROR: Timeout connecting!")
+		sys.exit(1)
+	sleep(0.005)
 
 print("GPS_LOGGER: Connected")
-mavmaster.mav.request_data_stream_send(mavmaster.target_system, 
-        mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
-        10, 1)
+mavmaster.mav.request_data_stream_send(mavmaster.target_system,
+		mavmaster.target_component, mavutil.mavlink.MAV_DATA_STREAM_POSITION,
+		10, 1)
 
 print("GPS_LOGGER: Running")
 
 
-
+hdg = 0
 while runstate:
-    msg = mavmaster.recv_match(blocking=True, timeout = 10)
-    if msg is not None:
-        if msg.get_type() == 'GLOBAL_POSITION_INT':
-    	    logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(), 
-                msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, msg.hdg))
+	msg = mavmaster.recv_match(blocking=True, timeout = 10)
+	if msg is not None:
+		if msg.get_type() == 'GLOBAL_POSITION_INT_COV':
+			logfile.write("%.3f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n" % (time.time(),
+				msg.lat, msg.lon, msg.time_boot_ms, msg.alt, msg.relative_alt, msg.vx, msg.vy, msg.vz, hdg, msg.time_utc))
+		if msg.get_type() == 'GLOBAL_POSITION_INT':
+			hdg = msg.hdg
+
 print("GPS_LOGGER: Ending thread")
 logfile.close()
 
