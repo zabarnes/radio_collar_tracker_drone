@@ -1,4 +1,7 @@
-.PHONY: PI_install PI_uninstall all clean sdr_record/sdr_record
+.PHONY: PI_install PI_uninstall all clean sdr_record/sdr_record test
+
+test:
+	$(MAKE) -C utilities test
 
 all:
 	$(MAKE) -C sdr_record all
