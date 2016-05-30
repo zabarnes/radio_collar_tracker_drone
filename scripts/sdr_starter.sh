@@ -26,7 +26,7 @@ while getopts "r:f:g:o:s:p:" opt; do
 			gain=$OPTARG
 			;;
 		o)
-			output=$OPTARG
+			output_dir=$OPTARG
 			;;
 		s)
 			sampling_freq=$OPTARG
@@ -48,6 +48,11 @@ if [[ $run -eq -1 ]]; then
 	run=`rct_getRunNum.py $output_dir`
 fi
 
+output=`printf "%s/RUN_%06d" $output_dir $run`
+if [[ ! -e $output ]]; then
+	mkdir $output
+fi
+
 if [[ "$freq" -ne $freq ]]; then
 	echo "ERROR: Bad frequency"
 	exit 1
@@ -58,10 +63,10 @@ if [[ "sampling_freq" -ne $sampling_freq ]]; then
 	exit 1
 fi
 
-rct_gps_logger.py -o $output_dir -r $run -i $mav_port &>> ${gps_log} &
+rct_gps_logger.py -o $output -r $run -i $mav_port &>> ${gps_log} &
 mavproxypid=$!
 
-sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output_dir &>> ${sdr_log} &
+sdr_record -g $gain -s $sampling_freq -f $freq -r $run -o $output &>> ${sdr_log} &
 sdr_record_pid=$!
 
 trap "echo 'got sigint'; kill -s SIGINT $mavproxypid; kill -s SIGINT $sdr_record_pid; echo low > $led_dir/direction; sleep 1; exit 0" SIGINT SIGTERM
