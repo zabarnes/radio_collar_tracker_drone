@@ -33,10 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "queue.h"
 #include <stdint.h>
 
+#include <fftw3.h>
+
 // Global constants
 #define FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS	50
 #define FRAMES_PER_FILE	80
 #define META_PREFIX "META_"
+#define FFT_LENGTH 4096
 
 // Typedefs
 struct proc_queue_args {
@@ -240,6 +243,15 @@ void* proc_queue(void* args) {
 
 	uint8_t data_buf[frame_len];
 
+	fftw_complex *fft_buffer_in;
+	fftw_plan plan;
+
+	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
+	plan = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_in, FFTW_FORWARD,
+		FFTW_ESTIMATE);
+	int data_buf_idx = 0;
+	int fft_buffer_in_idx = 0;
+
 	frame_num = 0;
 	// Lock mutex
 	bool empty = true;
@@ -277,6 +289,21 @@ void* proc_queue(void* args) {
 			}
 			fwrite(data_buf, sizeof(uint8_t), frame_len, data_stream);
 
+			while(data_buf_idx < frame_len){
+				for(fft_buffer_in_idx; fft_buffer_in_idx < FFT_LENGTH && data_buf_idx < frame_len; fft_buffer_in_idx++){
+					fft_buffer_in[fft_buffer_in_idx][0] = data_buf[data_buf_idx] / 128.0 - 1.0;
+					data_buf_idx++;
+					fft_buffer_in[fft_buffer_in_idx][1] = data_buf[data_buf_idx] / 128.0 - 1.0;
+					data_buf_idx++;
+				}
+				if(data_buf_idx == frame_len){
+					break;
+				}else{
+					fftw_execute(plan);
+				}
+
+			}
+
 			free(data_ptr);
 			frame_num++;
 			num_samples += frame_len / 2;
@@ -287,6 +314,9 @@ void* proc_queue(void* args) {
 	fclose(data_stream);
 	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	printf("Queue length at end: %d.\n", data_queue.length);
+	fftw_free(fft_buffer_in);
+	fftw_destroy_plan(plan);
+	fftw_cleanup();
 	return NULL;
 }
 

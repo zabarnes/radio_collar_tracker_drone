@@ -18,6 +18,7 @@ AC_PROG_SED
 
 # Checks for libraries.
 PKG_CHECK_MODULES([rtlsdr], [librtlsdr])
+PKG_CHECK_MODULES([fftw3], [fftw3])
 
 # Checks for Python libraries
 AC_PYTHON_MODULE([pymavlink], [fatal])
