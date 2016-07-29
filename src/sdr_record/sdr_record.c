@@ -239,15 +239,17 @@ void* proc_queue(void* args) {
 	char buff[256];
 	int frame_num;
 	uint64_t num_samples = 0;
+	uint64_t fft_counter = 0;
 	int file_num = 0;
 
 	uint8_t data_buf[frame_len];
 
-	fftw_complex *fft_buffer_in;
+	fftw_complex *fft_buffer_in, *fft_buffer_out;
 	fftw_plan plan;
 
 	fft_buffer_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
-	plan = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_in, FFTW_FORWARD,
+	fft_buffer_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * FFT_LENGTH);
+	plan = fftw_plan_dft_1d(FFT_LENGTH, fft_buffer_in, fft_buffer_out, FFTW_FORWARD,
 		FFTW_ESTIMATE);
 	int data_buf_idx = 0;
 	int fft_buffer_in_idx = 0;
@@ -289,6 +291,12 @@ void* proc_queue(void* args) {
 			}
 			fwrite(data_buf, sizeof(uint8_t), frame_len, data_stream);
 
+			free(data_ptr);
+			frame_num++;
+			num_samples += frame_len / 2;
+
+			printf("Wrote %f seconds of data so far\n", num_samples / 2048000.0);
+			data_buf_idx = 0;
 			while(data_buf_idx < frame_len){
 				for(fft_buffer_in_idx; fft_buffer_in_idx < FFT_LENGTH && data_buf_idx < frame_len; fft_buffer_in_idx++){
 					fft_buffer_in[fft_buffer_in_idx][0] = data_buf[data_buf_idx] / 128.0 - 1.0;
@@ -300,13 +308,11 @@ void* proc_queue(void* args) {
 					break;
 				}else{
 					fftw_execute(plan);
+					fft_buffer_in_idx = 0;
 				}
 
 			}
 
-			free(data_ptr);
-			frame_num++;
-			num_samples += frame_len / 2;
 		} else {
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
 		}
