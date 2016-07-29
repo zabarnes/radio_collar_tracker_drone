@@ -295,7 +295,7 @@ void* proc_queue(void* args) {
 			frame_num++;
 			num_samples += frame_len / 2;
 
-			printf("Wrote %f seconds of data so far\n", num_samples / 2048000.0);
+			// printf("Wrote %f seconds of data so far\n", num_samples / 2048000.0);
 			data_buf_idx = 0;
 			while(data_buf_idx < frame_len){
 				for(fft_buffer_in_idx; fft_buffer_in_idx < FFT_LENGTH && data_buf_idx < frame_len; fft_buffer_in_idx++){
@@ -315,12 +315,14 @@ void* proc_queue(void* args) {
 
 		} else {
 			usleep(FILE_CAPTURE_DAEMON_SLEEP_PERIOD_MS * 1000);
+			printf("idle\n");
 		}
 	}
 	fclose(data_stream);
 	printf("Recorded %f seconds of data to disk\n", num_samples / 2048000.0);
 	printf("Queue length at end: %d.\n", data_queue.length);
 	fftw_free(fft_buffer_in);
+	fftw_free(fft_buffer_out);
 	fftw_destroy_plan(plan);
 	fftw_cleanup();
 	return NULL;
