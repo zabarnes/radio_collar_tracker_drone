@@ -3,18 +3,14 @@ INSTALL_DIR=&INSTALL_PREFIX
 
 source $INSTALL_DIR/etc/rct_config
 
-led_dir="/sys/class/gpio/gpio$led_num"
-if [ ! -e $led_dir ]
-then
-	echo $led_num > /sys/class/gpio/export
-fi
 
 sdr_log="$log_dir/rct_sdr_log.log"
 gps_log="$log_dir/rct_gps_log.log"
 run=-1
+led_output=true
 
 OPTIND=1
-while getopts "r:f:g:o:s:p:" opt; do
+while getopts "r:f:g:o:s:p:n" opt; do
 	case $opt in
 		r)
 			run=$OPTARG
@@ -26,18 +22,30 @@ while getopts "r:f:g:o:s:p:" opt; do
 			gain=$OPTARG
 			;;
 		o)
-			output=$OPTARG
+			output_dir=$OPTARG
 			;;
 		s)
 			sampling_freq=$OPTARG
 			;;
 		p)
-			port=$OPTARG
+			mav_port=$OPTARG
+			;;
+		n)
+			led_output=false
 			;;
 	esac
 done
 
 echo "SDR_STARTER starting"
+
+if $led_output
+then
+	led_dir="/sys/class/gpio/gpio$led_num"
+	if [ ! -e $led_dir ]
+	then
+		echo $led_num > /sys/class/gpio/export
+	fi
+fi
 
 if [[ "$run" -ne $run ]]; then
 	echo "ERROR: Bad run number"
@@ -69,7 +77,10 @@ run=true
 while $run
 do
 	sleep 1
-	echo high > $led_dir/direction
+	if $led_output
+	then
+		echo high > $led_dir/direction
+	fi
 	if ! ps -p $mavproxypid > /dev/null
 	then
 		run=false
@@ -79,6 +90,9 @@ do
 		run=false
 	fi
 done
-echo low > $led_dir/direction
+if $led_output
+then
+	echo low > $led_dir/direction
+fi
 kill -s SIGINT $mavproxypid
 kill -s SIGINT $sdr_record_pid
